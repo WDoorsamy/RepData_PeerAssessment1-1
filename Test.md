@@ -1,13 +1,11 @@
----
-title: "Test"
-author: "WDoorsamy"
-date: "Monday, January 12, 2015"
-output: html_document
----
+# Test
+WDoorsamy  
+Monday, January 12, 2015  
 
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 if (!file.exists("./data")) {
     dir.create("./data")
 }
@@ -20,16 +18,20 @@ loader1 <- loader[complete.cases(loader), ]
 
 ## What is mean total number of steps taken per day?
 
-```{r}
+
+```r
 aggrstep <- aggregate(loader1$steps, list(loader1$date), sum)
 names(aggrstep) <- c("date", "totsteps")
 ```
 What is the average daily activity pattern?
 Make histogram for total steps for each day:
-```{r}
+
+```r
 hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each day", 
     xlab = "total step")
 ```
+
+![](Test_files/figure-html/unnamed-chunk-3-1.png) 
 
 
 ## Imputing missing values

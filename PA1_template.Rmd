@@ -2,7 +2,7 @@
 title: "Test"
 author: "WDoorsamy"
 date: "Monday, January 12, 2015"
-output: pdf_document
+output: html_document
 ---
 
 
@@ -14,14 +14,14 @@ if (!file.exists("./data")) {
 fileUrl <- "http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 download.file(fileUrl, destfile = "./data/activity.zip")
 unzip("./data/activity.zip", exdir = "./data", overwrite = TRUE)
-act1 <- read.csv("./data/activity.csv", sep = ",", na.strings = "NA")
-act <- act1[complete.cases(act1), ]
+loader <- read.csv("./data/activity.csv", sep = ",", na.strings = "NA")
+loader1 <- loader[complete.cases(loader), ]
 ```
 
 ## What is mean total number of steps taken per day?
 
 ```{r}
-aggrstep <- aggregate(act$steps, list(act$date), sum)
+aggrstep <- aggregate(loader1$steps, list(loader1$date), sum)
 names(aggrstep) <- c("date", "totsteps")
 ```
 What is the average daily activity pattern?
@@ -35,8 +35,5 @@ hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each d
 ## Imputing missing values
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
-library(knitr)
-knit2html("PA1_template.Rmd")
-```
+
 

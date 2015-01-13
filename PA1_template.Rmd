@@ -1,9 +1,8 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
+title: "Test"
 author: "WDoorsamy"
-output: 
-  html_document:
-    keep_md: true
+date: "Monday, January 12, 2015"
+output: pdf_document
 ---
 
 
@@ -33,10 +32,11 @@ hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each d
 ```
 
 
-
-
 ## Imputing missing values
 
-
-
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+library(knitr)
+knit2html("PA1_template.Rmd")
+```
+

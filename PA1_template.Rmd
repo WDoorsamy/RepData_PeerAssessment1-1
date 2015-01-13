@@ -17,14 +17,18 @@ unzip("./data/activity.zip", exdir = "./data", overwrite = TRUE)
 act1 <- read.csv("./data/activity.csv", sep = ",", na.strings = "NA")
 ```
 test4
-
-
-
 ## What is mean total number of steps taken per day?
+```{r}
+aggrstep <- aggregate(act$steps, list(act$date), sum)
+names(aggrstep) <- c("date", "totsteps")
+```
+What is the average daily activity pattern?
+Make histogram for total steps for each day:
+```{r}
+hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each day", 
+    xlab = "total step")
+```
 
-
-
-## What is the average daily activity pattern?
 
 
 

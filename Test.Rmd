@@ -21,19 +21,126 @@ loader1 <- loader[complete.cases(loader), ]
 ```
 
 ## What is mean total number of steps taken per day?
-
+Make histogram for total steps for each day:
 ```{r}
 aggrstep <- aggregate(loader1$steps, list(loader1$date), sum)
 names(aggrstep) <- c("date", "totsteps")
+hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each day",xlab = "total step")
 ```
-What is the average daily activity pattern?
-Make histogram for total steps for each day:
+
+The mean and median total number of steps taken per day, respectively, are:
 ```{r}
-hist(aggrstep$totsteps, main = "Frequency for total number of steps taken each day", 
-    xlab = "total step")
+mean(aggrstep$totsteps)
+median(aggrstep$totsteps)
+```
+##What is the average daily activity pattern?
+```{r}
+averages <- aggregate(loader1$steps, list(loader1$interval), mean)
+names(averages) <- c("interval", "average")
+head(averages)
+```
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r}
+maxaverage <- paste("Interval with max average steps =", subset(averages$interval, averages$average == 
+    max(averages$average)))
+library("ggplot2")
+g <- ggplot(averages, aes(interval, average))
+g + geom_line() + labs(x = "5-minute interval") + labs(y = "Average stesps number") + 
+    labs(title = "Average steps for 5  minute interval") + geom_vline(xintercept = 835, 
+    colour = "blue", linetype = "longdash") + annotate("text", y = -9.2, x = 835, 
+    label = maxaverage, colour = "blue")
+```
+Report 5 minute interval with maximum number of steps on average as shown on plot:
+```{r}
+subset(averages$interval, averages$average == max(averages$average))
+```
+## Imputing missing values
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r}
+nrow(loader) - nrow(loader[complete.cases(loader), ])
+```
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+```{r}
+loaderm <- merge(loader, averages)
+
+loaderm$steps[is.na(loaderm$steps)] <- round(loaderm$average, 0)[is.na(loaderm$steps)]
+
+loadermfilled <- as.data.frame(cbind(steps = loaderm$steps, date = as.character(loaderm$date), 
+    interval = loaderm$interval))
+
+loadermfilled$interval <- as.integer(as.character(loadermfilled$interval))
+
+loadermfilled$steps <- as.integer(as.character(loadermfilled$step))
+
+loadermfilledord <- loadermfilled[with(loadermfilled, order(date)), ]
+
+str(loader)
+
+str(loadermfilledord)
+
+head(loader, 7)
+
+head(loadermfilledord, 7)
 ```
 
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-## Imputing missing values
+```{r}
+aggrstepfilled <- aggregate(loadermfilledord$steps, list(loadermfilledord$date), 
+    sum)
+names(aggrstepfilled) <- c("date", "totsteps")
+
+hist(aggrstepfilled$totsteps, main = "Frequency for total number of steps \ntaken each day (Na = average for time interval)",xlab = "total step NA filled")
+mean(aggrstepfilled$totsteps)
+
+median(aggrstepfilled$totsteps)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
+
+Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+```{r}
+loadermfilledord$date <- as.POSIXct(as.character(loadermfilledord$date), format = "%Y-%m-%d")
+
+loadermfilledord$daytype <- "weekday"
+
+loadermfilledord$daytype[weekdays(loadermfilledord$date) %in% c("Saturday", "Sunday")] <- "weekend"
+
+loadermfilledord$daytype <- as.factor(loadermfilledord$daytype)
+
+str(loadermfilledord)
+
+head(loadermfilledord)
+
+
+averagewd <- aggregate(loadermfilledord$steps[loadermfilledord$daytype == "weekday"], 
+    list(loadermfilledord$interval[loadermfilledord$daytype == "weekday"]), mean)
+names(averagewd) <- c("interval", "averagedaytype")
+merwd <- merge(loadermfilledord[loadermfilledord$daytype == "weekday", ], averagewd)
+averagewe <- aggregate(loadermfilledord$steps[loadermfilledord$daytype == "weekend"], 
+    list(loadermfilledord$interval[loadermfilledord$daytype == "weekend"]), mean)
+names(averagewe) <- c("interval", "averagedaytype")
+merwe <- merge(loadermfilledord[loadermfilledord$daytype == "weekend", ], averagewe)
+head(merwd)
+
+head(merwe)
+
+
+averagedaytype <- rbind(merwd, merwe)
+averagedaytypeord <- averagedaytype[with(averagedaytype, order(date)), ]
+averagedaytypeord$averagedaytype <- round(averagedaytypeord$averagedaytype)
+head(averagedaytypeord)
+
+
+library(lattice)
+xyplot(averagedaytypeord$averagedaytype ~ averagedaytypeord$interval | averagedaytypeord$daytype, 
+    type = "l", layout = c(1, 2), xlab = "Interval", ylab = "Number of steps")
+```
